@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>浪漫圣诞树</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+        }
+        .info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="info">Merry Christmas</div>
+    <script>
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const particleCount = 8000;
+        const geometry = new THREE.BufferGeometry();
+        const material = new THREE.PointsMaterial({
+            size: 2,
+            color: 0xff69b4,
+            transparent: true,
+            opacity: 0.8
+        });
+
+        const positions = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
+        const color = new THREE.Color();
+
+        for (let i = 0; i < particleCount; i++) {
+            let x, y, z;
+            if (i < particleCount * 0.8) {
+                const r = Math.random() * 5 + 2;
+                const theta = Math.random() * Math.PI;
+                const phi = Math.random() * 2 * Math.PI;
+                x = r * Math.sin(theta) * Math.cos(phi);
+                y = -r * Math.cos(theta) + 5;
+                z = r * Math.sin(theta) * Math.sin(phi);
+            } else {
+                x = (Math.random() - 0.5) * 2;
+                y = Math.random() * 5 - 8;
+                z = (Math.random() - 0.5) * 2;
+            }
+            positions[i * 3] = x;
+            positions[i * 3 + 1] = y;
+            positions[i * 3 + 2] = z;
+
+            if (y > 5) {
+                color.set(0xff0000);
+            } else if (y > 0) {
+                color.setHSL(0.8, 1, (y + 5) / 10);
+            } else {
+                color.set(0x8b4513);
+            }
+            colors[i * 3] = color.r;
+            colors[i * 3 + 1] = color.g;
+            colors[i * 3 + 2] = color.b;
+        }
+
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        material.vertexColors = true;
+
+        const particles = new THREE.Points(geometry, material);
+        scene.add(particles);
+
+        const starsGeometry = new THREE.BufferGeometry();
+        const starsPositions = new Float32Array(2000 * 3);
+        for (let i = 0; i < 2000; i++) {
+            starsPositions[i * 3] = (Math.random() - 0.5) * 200;
+            starsPositions[i * 3 + 1] = (Math.random() - 0.5) * 200;
+            starsPositions[i * 3 + 2] = (Math.random() - 0.5) * 200;
+        }
+        starsGeometry.setAttribute('position', new THREE.BufferAttribute(starsPositions, 3));
+        const starsMaterial = new THREE.PointsMaterial({
+            size: 0.5,
+            color: 0xffffff
+        });
+        const stars = new THREE.Points(starsGeometry, starsMaterial);
+        scene.add(stars);
+
+        camera.position.z = 15;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            particles.rotation.y += 0.001;
+            stars.rotation.y += 0.0005;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
