@@ -3,22 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>浪漫圣诞树</title>
+    <title>粉色梦幻圣诞树</title>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
     <style>
         body { margin: 0; overflow: hidden; background: #000; }
-        .info { 
-            position: absolute; 
-            top: 10px; 
-            left: 10px; 
-            color: #fff; 
-            font-family: Arial, sans-serif; 
+        .title {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #fff;
+            font-size: 20px;
+            text-shadow: 0 0 10px #ff69b4;
             z-index: 10;
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
-    <div class="info">Merry Christmas</div>
+    <div class="title">TO：依依 天天开心</div>
     <script>
         // 初始化场景、相机、渲染器
         const scene = new THREE.Scene();
@@ -27,67 +30,89 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // 生成粒子圣诞树
+        // 生成粉色粒子圣诞树
         const particleCount = 8000;
         const positions = new Float32Array(particleCount * 3);
         const colors = new Float32Array(particleCount * 3);
-        const color = new THREE.Color(0xff69b4); // 浪漫粉色
+        const color = new THREE.Color(0xff69b4);
 
-        // 构建圣诞树粒子位置和颜色
         for (let i = 0; i < particleCount; i++) {
             const theta = Math.random() * Math.PI * 2;
             const phi = Math.acos(2 * Math.random() - 1);
-            const r = 5 * Math.random() ** 2; // 模拟圣诞树的锥形结构
-
+            const r = 5 * Math.random() ** 2;
             positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-            positions[i * 3 + 1] = r * Math.cos(phi) - 2.5; // 调整Y轴位置，让树更居中
+            positions[i * 3 + 1] = r * Math.cos(phi) - 2.5;
             positions[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
 
-            // 颜色渐变（顶部更亮）
             const brightness = 0.5 + 0.5 * (positions[i * 3 + 1] + 2.5) / 5;
-            color.setRGB(1, 0.4, 0.7); // 粉色系
+            color.setRGB(1, 0.4, 0.7);
             color.multiplyScalar(brightness);
             colors[i * 3] = color.r;
             colors[i * 3 + 1] = color.g;
             colors[i * 3 + 2] = color.b;
         }
 
-        // 粒子几何体和材质
         const geometry = new THREE.BufferGeometry();
         geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
         geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
         const material = new THREE.PointsMaterial({
-            size: 0.1,
-            vertexColors: true,
-            transparent: true,
-            opacity: 0.8,
-            blending: THREE.AdditiveBlending
+            size: 0.1, vertexColors: true, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending
         });
-
-        // 生成粒子对象并添加到场景
         const particles = new THREE.Points(geometry, material);
         scene.add(particles);
 
-        // 树顶爱心
-        const heartGeo = new THREE.SphereGeometry(0.3, 16, 16);
-        const heartMat = new THREE.MeshBasicMaterial({ color: 0xff1493 });
-        const heart = new THREE.Mesh(heartGeo, heartMat);
-        heart.position.y = 2.8;
-        scene.add(heart);
+        // 树顶星星
+        const starGeo = new THREE.OctahedronGeometry(0.4);
+        const starMat = new THREE.MeshBasicMaterial({ color: 0xffff00, emissive: 0xffff00, emissiveIntensity: 0.5 });
+        const star = new THREE.Mesh(starGeo, starMat);
+        star.position.y = 2.8;
+        scene.add(star);
+
+        // 礼物盒
+        const giftGeo = new THREE.BoxGeometry(0.6, 0.4, 0.6);
+        const giftMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const gift = new THREE.Mesh(giftGeo, giftMat);
+        gift.position.set(2, -1, 0);
+        scene.add(gift);
+
+        // 雪人
+        const snowmanGeo = new THREE.SphereGeometry(0.3, 16, 16);
+        const snowmanMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const snowmanHead = new THREE.Mesh(snowmanGeo, snowmanMat);
+        const snowmanBody = new THREE.Mesh(snowmanGeo, snowmanMat);
+        snowmanBody.scale.set(1.2, 1.2, 1.2);
+        snowmanBody.position.y = -0.7;
+        snowmanHead.position.y = -0.2;
+        scene.add(snowmanBody);
+        scene.add(snowmanHead);
+
+        // 雪人装饰
+        const hatGeo = new THREE.ConeGeometry(0.2, 0.3, 8);
+        const hatMat = new THREE.MeshBasicMaterial({ color: 0xff69b4 });
+        const hat = new THREE.Mesh(hatGeo, hatMat);
+        hat.position.y = 0.1;
+        snowmanHead.add(hat);
+
+        const noseGeo = new THREE.ConeGeometry(0.05, 0.2, 3);
+        const noseMat = new THREE.MeshBasicMaterial({ color: 0xffa500 });
+        const nose = new THREE.Mesh(noseGeo, noseMat);
+        nose.rotation.y = Math.PI / 2;
+        nose.position.x = 0.15;
+        snowmanHead.add(nose);
 
         // 相机位置
         camera.position.z = 10;
 
-        // 动画循环（让粒子和爱心缓慢旋转）
+        // 动画循环
         function animate() {
             requestAnimationFrame(animate);
             particles.rotation.y += 0.005;
-            heart.rotation.y += 0.01;
+            star.rotation.y += 0.01;
             renderer.render(scene, camera);
         }
         animate();
 
-        // 窗口大小调整
+        // 窗口适配
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
